@@ -175,3 +175,9 @@ chore: update dependencies
 - Update documentation for API changes
 - Follow the established code style
 - Use conventional commit messages
+
+Github URL:
+
+```bash
+https://github.com/odyssey-technologies/success-motors-management-system
+```
