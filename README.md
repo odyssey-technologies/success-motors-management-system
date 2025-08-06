@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Car Dealership Management System
 
-## Getting Started
+A comprehensive web-based management system for car dealerships built with Next.js 15, TypeScript, and PostgreSQL. This system handles inventory management, sales tracking, employee management, payroll, GPS tracking, and financial reporting.
 
-First, run the development server:
+## Features
+
+- **Inventory Management**: Track vehicles, calculate bond rent, manage stock levels
+- **Sales Management**: Handle cash and credit sales, payment tracking, customer management
+- **Employee Management**: Staff database, biometric attendance, payroll automation
+- **Financial Tracking**: Profit/loss calculations, expense tracking, reporting
+- **GPS Tracking**: Real-time vehicle location monitoring for credit sales
+- **Role-based Access Control**: Admin, Manager, Salesperson, Accountant, Staff roles
+- **Comprehensive Reporting**: PDF/Excel exports, business analytics
+- **Real-time Updates**: Live dashboards and notifications
+
+
+## Tech Stack
+
+- **Frontend**: Next.js 15 (App Router), TypeScript, Tailwind CSS
+- **UI Components**: shadcn/ui, Radix UI
+- **Backend**: Next.js API Routes, Server Actions
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js v5
+- **State Management**: Zustand, TanStack Query
+- **Forms**: React Hook Form with Zod validation
+- **Charts**: Recharts
+- **Testing**: Jest, React Testing Library, Playwright
+
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** (v20.9 or later)
+- **npm** or **yarn** or **pnpm**
+- **Docker** and **Docker Compose**
+- **Git**
+
+## Database Setup with Docker
+
+### 1. Start Database Services
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+    # Start PostgreSQL and related services
+    docker-compose up -d
+
+    # Check if services are running
+    docker-compose ps
+
+    # View logs if needed
+    docker-compose logs postgres
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
