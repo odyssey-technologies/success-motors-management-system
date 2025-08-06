@@ -85,17 +85,17 @@ bun install
 Create a `.env.local` file in the project root:
 
 ```bash
-    # Database Configuration
-    DATABASE_URL="postgresql://dealership_user:dealership_password@localhost:5432/car_dealership_db"
+# Database Configuration
+DATABASE_URL="postgresql://dealership_user:dealership_password@localhost:5432/car_dealership_db"
 
-    # NextAuth Configuration
-    NEXTAUTH_SECRET="your-super-secret-key-here-change-in-production"
-    NEXTAUTH_URL="http://localhost:3000"
+# NextAuth Configuration
+NEXTAUTH_SECRET="your-super-secret-key-here-change-in-production"
+NEXTAUTH_URL="http://localhost:3000"
 
-    REDIS_URL="redis://localhost:6379"
+REDIS_URL="redis://localhost:6379"
 
-    # Development/Production Flag
-    NODE_ENV="development"
+# Development/Production Flag
+NODE_ENV="development"
 ```
 
 ### 4. Database Migration and Seeding
@@ -110,6 +110,12 @@ npm run db:seed
 
 # Optional: Open Prisma Studio to view data
 npx prisma studio
+
+# Reset database (This deletes all data)
+npx prisma migrate reset
+
+# Generate client after schema changes
+npx prisma generate
 ```
 
 ### Database Backup and Restore
@@ -161,3 +167,11 @@ refactor: restructure database queries
 test: add unit tests for sales module
 chore: update dependencies
 ```
+
+### Development Guidelines
+
+- Follow TypeScript best practices
+- Write tests for new features
+- Update documentation for API changes
+- Follow the established code style
+- Use conventional commit messages
