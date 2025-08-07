@@ -32,8 +32,6 @@ model Vehicle {
   saleDate              DateTime?     @map("sale_date")
   status                VehicleStatus @default(AVAILABLE)
   location              String
-  images                Json?         // Array of image URLs
-  documents             Json?         // Array of document URLs
   createdAt             DateTime      @default(now()) @map("created_at")
   updatedAt             DateTime      @updatedAt @map("updated_at")
 
@@ -41,8 +39,34 @@ model Vehicle {
   expenses              VehicleExpense[]
   bondRents             BondRent[]
   sale                  Sale?
+  images                VehicleImage[]
+  documents             VehicleDocument[]
 
   @@map("vehicles")
+}
+
+model VehicleImage {
+  id            String    @id @default(cuid())
+  vehicleId     String     @map("vehicle_id")
+  imageUrl      String
+
+
+  // Relations
+  vehicle       Vehicle     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+   @@map("vehicle_images")
+}
+
+model VehicleDocument {
+  id            String    @id @default(cuid())
+  vehicleId     String     @map("vehicle_id")
+  docUrl        String
+
+
+  // Relations
+  vehicle       Vehicle     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+   @@map("vehicle_documents")
 }
 
 model User {
