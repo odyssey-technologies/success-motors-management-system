@@ -38,14 +38,292 @@ model Vehicle {
   updatedAt             DateTime      @updatedAt @map("updated_at")
 
   // Relations
-  // expenses              VehicleExpense[]
-  // bondRents             BondRent[]
-  // sale                  Sale?
-  // vehicleGPS            VehicleGPS?
-  // gpsLocations          GPSLocation[]
-  // geofenceAlerts        GeofenceAlert[]
+  expenses              VehicleExpense[]
+  bondRents             BondRent[]
+  sale                  Sale?
 
   @@map("vehicles")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  username      String    @unique
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  role          UserRole
+  employeeId    String?   @unique @map("employee_id")
+  isActive      Boolean   @default(true) @map("is_active")
+  lastLogin     DateTime? @map("last_login")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  employee      Employee? @relation(fields: [employeeId], references: [id])
+  sales         Sale[]
+  auditLogs     AuditLog[]
+  payrollsProcessed Payroll[] @relation("PayrollProcessor")
+
+  @@map("users")
+}
+
+model VehicleExpense {
+  id            String      @id @default(cuid())
+  vehicleId     String      @map("vehicle_id")
+  expenseType   ExpenseType @map("expense_type")
+  amount        Decimal     @db.Decimal(10, 2)
+  description   String
+  dateIncurred  DateTime    @map("date_incurred")
+  receiptNumber String?     @map("receipt_number")
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  vehicle       Vehicle     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("vehicle_expenses")
+}
+
+model BondRent {
+  id          String    @id @default(cuid())
+  vehicleId   String    @map("vehicle_id")
+  dailyRate   Decimal   @map("daily_rate") @db.Decimal(8, 2)
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  totalDays   Int?      @map("total_days")
+  totalAmount Decimal?  @map("total_amount") @db.Decimal(10, 2)
+  status      BondStatus @default(ACTIVE)
+
+  // Relations
+  vehicle     Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("bond_rents")
+}
+
+model Customer {
+  id           String       @id @default(cuid())
+  firstName    String       @map("first_name")
+  lastName     String       @map("last_name")
+  email        String?
+  phone        String
+  nationalId   String?      @map("national_id")
+  address      String
+  city         String
+  district     String
+  customerType CustomerType @map("customer_type")
+  creditLimit  Decimal      @default(0) @map("credit_limit") @db.Decimal(10, 2)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  sales        Sale[]
+
+  @@map("customers")
+}
+
+model Sale {
+  id             String        @id @default(cuid())
+  vehicleId      String        @unique @map("vehicle_id")
+  customerId     String        @map("customer_id")
+  salespersonId  String        @map("salesperson_id")
+  saleDate       DateTime      @map("sale_date")
+  salePrice      Decimal       @map("sale_price") @db.Decimal(12, 2)
+  paymentMethod  PaymentMethod @map("payment_method")
+  paymentStatus  PaymentStatus @map("payment_status") @default(PENDING)
+  totalPaid      Decimal       @default(0) @map("total_paid") @db.Decimal(12, 2)
+  balanceDue     Decimal?      @map("balance_due") @db.Decimal(12, 2)
+  dueDate        DateTime?     @map("due_date")
+  receiptNumber  String        @unique @map("receipt_number")
+  notes          String?
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  vehicle        Vehicle       @relation(fields: [vehicleId], references: [id])
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  salesperson    User          @relation(fields: [salespersonId], references: [id])
+  payments       Payment[]
+  creditSale     CreditSale?
+
+  @@map("sales")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  saleId          String        @map("sale_id")
+  amount          Decimal       @db.Decimal(10, 2)
+  paymentMethod   PaymentMethod @map("payment_method")
+  paymentDate     DateTime      @map("payment_date")
+  referenceNumber String?       @map("reference_number")
+  notes           String?
+  processedBy     String        @map("processed_by")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  sale            Sale          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model CreditSale {
+  id                   String           @id @default(cuid())
+  saleId               String           @unique @map("sale_id")
+  totalAmount          Decimal          @map("total_amount") @db.Decimal(12, 2)
+  downPayment          Decimal          @map("down_payment") @db.Decimal(12, 2)
+  monthlyPayment       Decimal          @map("monthly_payment") @db.Decimal(10, 2)
+  paymentPeriodMonths  Int              @map("payment_period_months")
+  interestRate         Decimal          @map("interest_rate") @db.Decimal(5, 2)
+  startDate            DateTime         @map("start_date")
+  endDate              DateTime         @map("end_date")
+  status               CreditSaleStatus @default(ACTIVE)
+  createdAt            DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  sale                 Sale             @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@map("credit_sales")
+}
+
+model Employee {
+  id                  String       @id @default(cuid())
+  employeeNumber      String       @unique @map("employee_number")
+  firstName           String       @map("first_name")
+  lastName            String       @map("last_name")
+  email               String       @unique
+  phone               String
+  nationalId          String       @unique @map("national_id")
+  position            String
+  department          Department
+  hireDate            DateTime     @map("hire_date")
+  salaryType          SalaryType   @map("salary_type")
+  baseSalary          Decimal      @map("base_salary") @db.Decimal(10, 2)
+  commissionRate      Decimal?     @map("commission_rate") @db.Decimal(5, 2)
+  bankAccount         String?      @map("bank_account")
+  mobileMoneyNumber   String?      @map("mobile_money_number")
+  status              EmployeeStatus @default(ACTIVE)
+  biometricId         String?      @map("biometric_id")
+  createdAt           DateTime     @default(now()) @map("created_at")
+  updatedAt           DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  user                User?
+  attendance          Attendance[]
+  payrolls            Payroll[]
+
+  @@map("employees")
+}
+
+model Attendance {
+  id           String           @id @default(cuid())
+  employeeId   String           @map("employee_id")
+  date         DateTime         @db.Date
+  clockInTime  DateTime?        @map("clock_in_time")
+  clockOutTime DateTime?        @map("clock_out_time")
+  totalHours   Decimal?         @map("total_hours") @db.Decimal(4, 2)
+  status       AttendanceStatus
+  deviceId     String?          @map("device_id")
+  notes        String?
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  employee     Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, date])
+  @@map("attendance")
+}
+
+model Payroll {
+  id               String        @id @default(cuid())
+  employeeId       String        @map("employee_id")
+  payPeriodStart   DateTime      @map("pay_period_start") @db.Date
+  payPeriodEnd     DateTime      @map("pay_period_end") @db.Date
+  basePay          Decimal       @map("base_pay") @db.Decimal(10, 2)
+  commissionEarned Decimal       @default(0) @map("commission_earned") @db.Decimal(10, 2)
+  overtimePay      Decimal       @default(0) @map("overtime_pay") @db.Decimal(10, 2)
+  deductions       Decimal       @default(0) @db.Decimal(10, 2)
+  grossPay         Decimal       @map("gross_pay") @db.Decimal(10, 2)
+  taxDeduction     Decimal       @map("tax_deduction") @db.Decimal(10, 2)
+  netPay           Decimal       @map("net_pay") @db.Decimal(10, 2)
+  paymentDate      DateTime?     @map("payment_date")
+  paymentMethod    PaymentMethod @map("payment_method")
+  paymentReference String?       @map("payment_reference")
+  status           PayrollStatus @default(DRAFT)
+  processedBy      String?       @map("processed_by")
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  employee         Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  processor        User?         @relation("PayrollProcessor", fields: [processedBy], references: [id])
+
+  @@map("payrolls")
+}
+
+// System Models
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  action     String
+  tableName  String   @map("table_name")
+  recordId   String   @map("record_id")
+  oldValues  Json?    @map("old_values")
+  newValues  Json?    @map("new_values")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  timestamp  DateTime @default(now())
+
+  // Relations
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+//enums
+
+enum PayrollStatus {
+  DRAFT
+  APPROVED
+  PAID
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+}
+
+enum Department {
+  SALES
+  ACCOUNTS
+  MANAGEMENT
+  SECURITY
+  MAINTENANCE
+}
+
+enum SalaryType {
+  MONTHLY
+  DAILY
+  COMMISSION
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  TERMINATED
+}
+
+enum CreditSaleStatus {
+  ACTIVE
+  COMPLETED
+  DEFAULTED
+}
+
+enum CustomerType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum BondStatus {
+  ACTIVE
+  COMPLETED
 }
 
 enum FuelType {
@@ -70,4 +348,33 @@ enum VehicleStatus {
   RESERVED
   SOLD
   MAINTENANCE
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  SALESPERSON
+  ACCOUNTANT
+  STAFF
+}
+
+enum ExpenseType {
+  BOND_RENT
+  TRANSPORT
+  MAINTENANCE
+  INSURANCE
+  REGISTRATION
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT
+  BANK_TRANSFER
+  MOBILE_MONEY
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  COMPLETED
 }
